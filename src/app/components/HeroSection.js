@@ -80,13 +80,16 @@ function HeroSection({ dragActive, setDragActive }) {
           {/* Enhanced Upload Zone */}
           <div className="max-w-lg mx-auto mb-8">
             <div
+              onClick={() => {
+                window.location.href = "/user";
+              }}
               className={`relative group cursor-pointer transition-all duration-300 ${
                 dragActive ? "scale-105" : "hover:scale-102"
               }`}
-              onDragEnter={handleDrag}
-              onDragLeave={handleDrag}
-              onDragOver={handleDrag}
-              onDrop={handleDrop}
+              // onDragEnter={handleDrag}
+              // onDragLeave={handleDrag}
+              // onDragOver={handleDrag}
+              // onDrop={handleDrop}
             >
               <div
                 className={`
@@ -99,12 +102,12 @@ function HeroSection({ dragActive, setDragActive }) {
                 backdrop-blur-sm group-hover:border-blue-400
               `}
               >
-                <input
+                {/* <input
                   type="file"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   onChange={handleFileInput}
                   accept=".pdf,.doc,.docx,.txt,.jpg,.png"
-                />
+                /> */}
 
                 {!isUploading ? (
                   <>
