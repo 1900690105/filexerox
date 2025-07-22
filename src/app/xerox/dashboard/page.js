@@ -1,63 +1,65 @@
 "use client";
+
 import { useState } from "react";
 import {
-  Clock,
-  CheckCircle,
-  XCircle,
-  User,
   FileText,
-  MoreVertical,
-  Edit3,
+  Calendar,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Eye, // Added for preview icon
+  Printer, // Added for print icon
+  X, // Added for close modal icon
 } from "lucide-react";
-import { Navbar } from "@/app/components/NavBar";
+import { Navbar } from "../../components/NavBar";
+import Image from "next/image";
+import UploadSection from "@/app/user/components/UploadSection";
 
-export default function UserDashboard() {
-  const [uploadedFiles, setUploadedFiles] = useState([
+export default function Dashboard() {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [selectedFileForPreview, setSelectedFileForPreview] = useState(null); // New state for preview
+
+  const [uploads, setUploads] = useState([
     {
-      id: 1,
-      name: "Resume.pdf",
+      name: "mark.pdf",
+      date: "2025-07-22",
       status: "Pending",
-      uploadedAt: "2025-07-21",
       size: "2.4 MB",
-      type: "pdf",
+      type: "PDF",
+      url: "/mark.pdf", // Added URL for preview
     },
     {
-      id: 2,
-      name: "Notes.docx",
+      name: "mark.pdf",
+      date: "2025-07-21",
       status: "Printed",
-      uploadedAt: "2025-07-20",
-      size: "1.8 MB",
-      type: "docx",
+      size: "1.2 MB",
+      type: "DOCX",
+      url: "/mark.pdf", // Added URL for preview
     },
     {
-      id: 3,
-      name: "Presentation.pptx",
+      name: "mark.pdf",
+      date: "2025-07-20",
       status: "Rejected",
-      uploadedAt: "2025-07-19",
-      size: "5.2 MB",
-      type: "pptx",
+      size: "3.1 MB",
+      type: "PDF",
+      url: "/mark.pdf", // Added URL for preview
+    },
+    {
+      name: "mark.pdf",
+      date: "2025-07-19",
+      status: "Printed",
+      size: "800 KB",
+      type: "PNG",
+      url: "/mark.pdf", // Added URL for preview
     },
   ]);
-
-  const [editingFile, setEditingFile] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(null);
-
-  const statusOptions = ["Pending", "Printed", "Rejected"];
-
-  const updateFileStatus = (fileId, newStatus) => {
-    setUploadedFiles((prev) =>
-      prev.map((file) =>
-        file.id === fileId ? { ...file, status: newStatus } : file
-      )
-    );
-    setEditingFile(null);
-    setShowDropdown(null);
-  };
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "Printed":
         return <CheckCircle className="w-4 h-4" />;
+      case "Pending":
+        return <Clock className="w-4 h-4" />;
       case "Rejected":
         return <XCircle className="w-4 h-4" />;
       default:
@@ -69,45 +71,83 @@ export default function UserDashboard() {
     switch (status) {
       case "Printed":
         return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      case "Pending":
+        return "bg-amber-100 text-amber-800 border-amber-200";
       case "Rejected":
         return "bg-red-100 text-red-800 border-red-200";
       default:
-        return "bg-amber-100 text-amber-800 border-amber-200";
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-  const getFileIcon = (type) => {
-    return <FileText className="w-5 h-5 text-gray-400" />;
+  const handleFileClick = (file) => {
+    setSelectedFileForPreview(file);
   };
 
+  const handlePrint = () => {
+    if (selectedFileForPreview && selectedFileForPreview.url) {
+      // For PDFs, we can create a temporary iframe and print it
+      if (selectedFileForPreview.type === "PDF") {
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = selectedFileForPreview.url;
+        document.body.appendChild(iframe);
+        iframe.onload = () => {
+          iframe.contentWindow.print();
+          document.body.removeChild(iframe); // Clean up the iframe after printing
+        };
+      } else {
+        // For other file types, you might need a more sophisticated approach
+        // or rely on the browser's default print behavior for the current page
+        // For demonstration, we'll just open it in a new tab and print
+        const printWindow = window.open(selectedFileForPreview.url, "_blank");
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.print();
+          };
+        } else {
+          alert(
+            "Please allow pop-ups for printing. Or download the file and print manually."
+          );
+        }
+      }
+    } else {
+      alert("No file selected for printing or file URL is missing.");
+    }
+  };
+
+  const pendingCount = uploads.filter((u) => u.status === "Pending").length;
+  const printedCount = uploads.filter((u) => u.status === "Printed").length;
+  const rejectedCount = uploads.filter((u) => u.status === "Rejected").length;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-8 mt-16">
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8 mt-20">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Files</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {uploadedFiles.length}
+                <p className="text-sm font-medium text-gray-600">Pending</p>
+                <p className="text-3xl font-bold text-amber-600">
+                  {pendingCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-600" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Printed</p>
+                <p className="text-sm font-medium text-gray-600">Printed</p>
                 <p className="text-3xl font-bold text-emerald-600">
-                  {uploadedFiles.filter((f) => f.status === "Printed").length}
+                  {printedCount}
                 </p>
               </div>
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
@@ -116,172 +156,146 @@ export default function UserDashboard() {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300">
+          <div className="bg-white/70 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Pending</p>
-                <p className="text-3xl font-bold text-amber-600">
-                  {uploadedFiles.filter((f) => f.status === "Pending").length}
+                <p className="text-sm font-medium text-gray-600">Rejected</p>
+                <p className="text-3xl font-bold text-red-600">
+                  {rejectedCount}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                <Clock className="w-6 h-6 text-amber-600" />
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-red-600" />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
-          {/* Files List */}
-          <div className="lg:col-span-2">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
-              <div className="p-6 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Your Uploaded Files
-                </h2>
-              </div>
+        {/* Upload Section */}
+        <UploadSection isDragOver={isDragOver} setIsDragOver={setIsDragOver} />
 
-              <div className="overflow-x-auto">
-                {uploadedFiles.length > 0 ? (
-                  <table className="w-full">
-                    <thead className="bg-gray-50/50">
-                      <tr>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                          File
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                          Status
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                          Date
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                          Size
-                        </th>
-                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {uploadedFiles.map((file) => (
-                        <tr
-                          key={file.id}
-                          className="hover:bg-gray-50/50 transition-colors duration-200"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              {getFileIcon(file.type)}
-                              <div>
-                                <p className="font-medium text-gray-900">
-                                  {file.name}
-                                </p>
-                                <p className="text-sm text-gray-500 capitalize">
-                                  {file.type} file
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            {editingFile === file.id ? (
-                              <select
-                                value={file.status}
-                                onChange={(e) =>
-                                  updateFileStatus(file.id, e.target.value)
-                                }
-                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                autoFocus
-                                onBlur={() => setEditingFile(null)}
-                              >
-                                {statusOptions.map((status) => (
-                                  <option key={status} value={status}>
-                                    {status}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <button
-                                onClick={() => setEditingFile(file.id)}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${getStatusColor(
-                                  file.status
-                                )} hover:shadow-md transition-all duration-200 group`}
-                              >
-                                {getStatusIcon(file.status)}
-                                {file.status}
-                                <Edit3 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                              </button>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {file.uploadedAt}
-                          </td>
-                          <td className="px-6 py-4 text-sm text-gray-600">
-                            {file.size}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="relative">
-                              <button
-                                onClick={() =>
-                                  setShowDropdown(
-                                    showDropdown === file.id ? null : file.id
-                                  )
-                                }
-                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                              >
-                                <MoreVertical className="w-4 h-4 text-gray-500" />
-                              </button>
+        {/* Files List */}
+        <div className="bg-white/70 backdrop-blur-lg rounded-2xl border border-white/20 shadow-xl overflow-hidden">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              <span>Your Files ({uploads.length})</span>
+            </h2>
+          </div>
 
-                              {showDropdown === file.id && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
-                                  <div className="p-2">
-                                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
-                                      Change Status
-                                    </div>
-                                    {statusOptions.map((status) => (
-                                      <button
-                                        key={status}
-                                        onClick={() =>
-                                          updateFileStatus(file.id, status)
-                                        }
-                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2 ${
-                                          file.status === status
-                                            ? "bg-blue-50 text-blue-700"
-                                            : "text-gray-700"
-                                        }`}
-                                      >
-                                        {getStatusIcon(status)}
-                                        {status}
-                                        {file.status === status && (
-                                          <CheckCircle className="w-3 h-3 ml-auto" />
-                                        )}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="p-12 text-center">
-                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg">
-                      No files uploaded yet
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      Upload your first file to get started
-                    </p>
+          <div className="divide-y divide-gray-100">
+            {uploads.map((file, idx) => (
+              <div
+                key={idx}
+                className="p-6 hover:bg-white/50 transition-all duration-200 group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      {/* Added onClick handler to the file name */}
+                      <h3
+                        className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors cursor-pointer"
+                        onClick={() => handleFileClick(file)}
+                      >
+                        {file.name}
+                      </h3>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                        <span className="flex items-center space-x-1">
+                          <Calendar className="w-3 h-3" />
+                          <span>{file.date}</span>
+                        </span>
+                        <span>{file.size}</span>
+                        <span className="px-2 py-1 bg-gray-100 rounded text-xs font-medium">
+                          {file.type}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                )}
+
+                  <div
+                    className={`flex items-center space-x-2 px-3 py-2 rounded-full border ${getStatusColor(
+                      file.status
+                    )}`}
+                  >
+                    {getStatusIcon(file.status)}
+                    <span className="text-sm font-medium">{file.status}</span>
+                  </div>
+                </div>
               </div>
+            ))}
+          </div>
+
+          {uploads.length === 0 && (
+            <div className="p-12 text-center text-gray-500">
+              <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
+              <p>No files uploaded yet</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* File Preview Modal */}
+      {selectedFileForPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl h-full max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 flex items-center space-x-2">
+                <Eye className="w-5 h-5 text-blue-600" />
+                <span>Preview: {selectedFileForPreview.name}</span>
+              </h2>
+              <button
+                onClick={() => setSelectedFileForPreview(null)}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+                aria-label="Close preview"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-grow p-4 overflow-hidden">
+              {selectedFileForPreview.type === "PDF" ? (
+                <iframe
+                  src={selectedFileForPreview.url}
+                  title="File Preview"
+                  className="w-full h-full border rounded-md"
+                  frameBorder="0"
+                ></iframe>
+              ) : selectedFileForPreview.type === "PNG" ||
+                selectedFileForPreview.type === "JPG" ||
+                selectedFileForPreview.type === "JPEG" ||
+                selectedFileForPreview.type === "GIF" ? (
+                <div className="flex items-center justify-center w-full h-full">
+                  <Image
+                    src={`/${selectedFileForPreview.url}`}
+                    alt="File Preview"
+                    className="max-w-full max-h-full object-contain rounded-md"
+                  />
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full bg-gray-50 rounded-md text-gray-600 text-center">
+                  <p>
+                    No direct preview available for this file type (
+                    {selectedFileForPreview.type}).
+                    <br />
+                    You can try to print it, or download it to view.
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={handlePrint}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors shadow-md"
+              >
+                <Printer className="w-5 h-5 mr-2" />
+                Send for Print
+              </button>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      )}
+    </main>
   );
 }

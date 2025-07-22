@@ -8,8 +8,6 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  User,
-  LogOut,
 } from "lucide-react";
 import { Navbar } from "../../components/NavBar";
 import UploadSection from "../components/UploadSection";
@@ -18,21 +16,21 @@ export default function Dashboard() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploads, setUploads] = useState([
     {
-      name: "College_Assignment.pdf",
+      name: "mark.pdf",
       date: "2025-07-22",
       status: "Pending",
       size: "2.4 MB",
       type: "PDF",
     },
     {
-      name: "Notes.docx",
+      name: "mark.pdf",
       date: "2025-07-21",
       status: "Printed",
       size: "1.2 MB",
       type: "DOCX",
     },
     {
-      name: "Research_Paper.pdf",
+      name: "mark.pdf",
       date: "2025-07-20",
       status: "Rejected",
       size: "3.1 MB",
