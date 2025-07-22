@@ -1,32 +1,97 @@
 "use client";
-import { Upload, Printer, Copy } from "lucide-react";
-import React, { useState } from "react";
+import {
+  Upload,
+  Printer,
+  Copy,
+  Building2,
+  CheckCircle,
+  XCircle,
+  X,
+} from "lucide-react";
+import React, { useState, useEffect } from "react";
 
 function UploadSection({ isDragOver, setIsDragOver }) {
   const [files, setFiles] = useState([]);
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [isUploading, setIsUploading] = useState(false);
   const [printingOptions, setPrintingOptions] = useState({
     pages: "all",
     pageRange: "",
     copies: 1,
     colorMode: "bw",
     sided: "single",
+    pagePerSheet: "1",
+    xeroxCenterCode: "",
   });
 
-  const handleUpload = (e) => {
+  const showToast = (message, type) => {
+    setToast({ show: true, message, type });
+  };
+
+  const hideToast = () => {
+    setToast({ show: false, message: "", type: "" });
+  };
+
+  // Auto-hide toast after 5 seconds
+  useEffect(() => {
+    if (toast.show) {
+      const timer = setTimeout(() => {
+        hideToast();
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.show]);
+
+  const handleUpload = async (e) => {
     e.preventDefault();
     if (files.length === 0) return;
 
-    const newUploads = files.map((file) => ({
-      name: file.name,
-      date: new Date().toISOString().split("T")[0],
-      status: "Pending",
-      size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-      type: file.name.split(".").pop().toUpperCase(),
-      printingOptions: { ...printingOptions },
-    }));
+    // Validate xerox center code (if you want to make it required)
+    if (!printingOptions.xeroxCenterCode.trim()) {
+      showToast("Please enter a xerox center code", "error");
+      return;
+    }
 
-    setFiles([]);
-    console.log("Files to upload:", newUploads);
+    setIsUploading(true);
+
+    try {
+      // Simulate upload process
+      const newUploads = files.map((file) => ({
+        name: file.name,
+        date: new Date().toISOString().split("T")[0],
+        status: "Pending",
+        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+        type: file.name.split(".").pop().toUpperCase(),
+        printingOptions: { ...printingOptions },
+      }));
+
+      // Simulate API call with delay
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // Simulate random success/failure for demo
+      const isSuccess = Math.random() > 0.2; // 80% success rate
+
+      if (isSuccess) {
+        setFiles([]);
+        showToast(
+          `${files.length} file${
+            files.length > 1 ? "s" : ""
+          } uploaded successfully!`,
+          "success"
+        );
+        console.log("Files uploaded successfully:", newUploads);
+      } else {
+        throw new Error("Upload failed");
+      }
+    } catch (error) {
+      showToast(
+        "Upload failed. Please check your connection and try again.",
+        "error"
+      );
+      console.error("Upload error:", error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleDragOver = (e) => {
@@ -234,6 +299,27 @@ function UploadSection({ isDragOver, setIsDragOver }) {
                 </select>
               </div>
 
+              {/* Page per Sheet */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Pages per Sheet
+                </label>
+                <select
+                  value={printingOptions.pagePerSheet}
+                  onChange={(e) =>
+                    handlePrintingOptionChange("pagePerSheet", e.target.value)
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="1">1 page per sheet</option>
+                  <option value="2">2 pages per sheet</option>
+                  <option value="4">4 pages per sheet</option>
+                  <option value="6">6 pages per sheet</option>
+                  <option value="9">9 pages per sheet</option>
+                  <option value="16">16 pages per sheet</option>
+                </select>
+              </div>
+
               {/* Number of Copies */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 flex items-center space-x-2">
@@ -279,6 +365,26 @@ function UploadSection({ isDragOver, setIsDragOver }) {
                     +
                   </button>
                 </div>
+              </div>
+
+              {/* Xerox Center Code */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center space-x-2">
+                  <Building2 className="w-4 h-4" />
+                  <span>Xerox Center Code</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter center code"
+                  value={printingOptions.xeroxCenterCode}
+                  onChange={(e) =>
+                    handlePrintingOptionChange(
+                      "xeroxCenterCode",
+                      e.target.value
+                    )
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
             </div>
           </div>
