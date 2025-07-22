@@ -1,4 +1,3 @@
-import { FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -9,10 +8,10 @@ export const Navbar = () => (
         <div className="flex items-center space-x-2">
           <Link href={"/"}>
             <Image
-              src={"/logo.jpeg"}
+              src={"/logo.png"}
               alt="logo"
-              height={60}
-              width={60}
+              height={80}
+              width={80}
               className="rounded-full"
             />
           </Link>

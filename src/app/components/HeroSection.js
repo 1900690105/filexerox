@@ -146,7 +146,12 @@ function HeroSection({ dragActive, setDragActive }) {
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">
-            <button className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+            <button
+              onClick={() => {
+                window.location.href = "/user/dashboard";
+              }}
+              className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
               Start Printing Now
               <ArrowRight className="inline-block w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </button>

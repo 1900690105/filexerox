@@ -1,21 +1,17 @@
 "use client";
 import { useState } from "react";
 import {
-  Upload,
-  File,
   Clock,
   CheckCircle,
   XCircle,
   User,
-  LogOut,
-  Plus,
   FileText,
-  Download,
+  MoreVertical,
+  Edit3,
 } from "lucide-react";
+import { Navbar } from "@/app/components/NavBar";
 
 export default function UserDashboard() {
-  const [file, setFile] = useState(null);
-  const [dragActive, setDragActive] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([
     {
       id: 1,
@@ -43,38 +39,19 @@ export default function UserDashboard() {
     },
   ]);
 
-  const handleUpload = () => {
-    if (file) {
-      const newFile = {
-        id: Date.now(),
-        name: file.name,
-        status: "Pending",
-        uploadedAt: new Date().toISOString().split("T")[0],
-        size: (file.size / (1024 * 1024)).toFixed(1) + " MB",
-        type: file.name.split(".").pop().toLowerCase(),
-      };
-      setUploadedFiles([newFile, ...uploadedFiles]);
-      setFile(null);
-    }
-  };
+  const [editingFile, setEditingFile] = useState(null);
+  const [showDropdown, setShowDropdown] = useState(null);
 
-  const handleDrag = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
+  const statusOptions = ["Pending", "Printed", "Rejected"];
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
+  const updateFileStatus = (fileId, newStatus) => {
+    setUploadedFiles((prev) =>
+      prev.map((file) =>
+        file.id === fileId ? { ...file, status: newStatus } : file
+      )
+    );
+    setEditingFile(null);
+    setShowDropdown(null);
   };
 
   const getStatusIcon = (status) => {
@@ -106,37 +83,9 @@ export default function UserDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-                <File className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                  FileXerox
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Print & Document Management
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-gray-600">
-                <User className="w-4 h-4" />
-                <span className="text-sm">John Doe</span>
-              </div>
-              <button className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-6 py-8 mt-16">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300">
@@ -210,6 +159,9 @@ export default function UserDashboard() {
                         <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                           Size
                         </th>
+                        <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
@@ -232,20 +184,83 @@ export default function UserDashboard() {
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${getStatusColor(
-                                file.status
-                              )}`}
-                            >
-                              {getStatusIcon(file.status)}
-                              {file.status}
-                            </span>
+                            {editingFile === file.id ? (
+                              <select
+                                value={file.status}
+                                onChange={(e) =>
+                                  updateFileStatus(file.id, e.target.value)
+                                }
+                                className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                autoFocus
+                                onBlur={() => setEditingFile(null)}
+                              >
+                                {statusOptions.map((status) => (
+                                  <option key={status} value={status}>
+                                    {status}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <button
+                                onClick={() => setEditingFile(file.id)}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${getStatusColor(
+                                  file.status
+                                )} hover:shadow-md transition-all duration-200 group`}
+                              >
+                                {getStatusIcon(file.status)}
+                                {file.status}
+                                <Edit3 className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                              </button>
+                            )}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">
                             {file.uploadedAt}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-600">
                             {file.size}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="relative">
+                              <button
+                                onClick={() =>
+                                  setShowDropdown(
+                                    showDropdown === file.id ? null : file.id
+                                  )
+                                }
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                              >
+                                <MoreVertical className="w-4 h-4 text-gray-500" />
+                              </button>
+
+                              {showDropdown === file.id && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-10">
+                                  <div className="p-2">
+                                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3 py-2">
+                                      Change Status
+                                    </div>
+                                    {statusOptions.map((status) => (
+                                      <button
+                                        key={status}
+                                        onClick={() =>
+                                          updateFileStatus(file.id, status)
+                                        }
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2 ${
+                                          file.status === status
+                                            ? "bg-blue-50 text-blue-700"
+                                            : "text-gray-700"
+                                        }`}
+                                      >
+                                        {getStatusIcon(status)}
+                                        {status}
+                                        {file.status === status && (
+                                          <CheckCircle className="w-3 h-3 ml-auto" />
+                                        )}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}

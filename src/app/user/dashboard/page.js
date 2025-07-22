@@ -11,8 +11,8 @@ import {
   User,
   LogOut,
 } from "lucide-react";
-import { Navbar } from "../components/NavBar";
-import UploadSection from "./components/UploadSection";
+import { Navbar } from "../../components/NavBar";
+import UploadSection from "../components/UploadSection";
 
 export default function Dashboard() {
   const [isDragOver, setIsDragOver] = useState(false);
