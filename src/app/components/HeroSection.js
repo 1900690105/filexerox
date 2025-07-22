@@ -81,7 +81,7 @@ function HeroSection({ dragActive, setDragActive }) {
           <div className="max-w-lg mx-auto mb-8">
             <div
               onClick={() => {
-                window.location.href = "/user";
+                window.location.href = "/user/dashboard";
               }}
               className={`relative group cursor-pointer transition-all duration-300 ${
                 dragActive ? "scale-105" : "hover:scale-102"
