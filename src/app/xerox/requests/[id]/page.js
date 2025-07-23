@@ -283,7 +283,7 @@ export default function RequestDetailsPage() {
 
             {isImage && (
               <div className="h-96 w-full flex items-center justify-center">
-                <img
+                <Image
                   src={selectedFile.fileUrl}
                   alt={selectedFile.filename}
                   className="max-w-full max-h-full object-contain"
