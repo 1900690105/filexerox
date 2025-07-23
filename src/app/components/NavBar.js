@@ -48,7 +48,7 @@ export const Navbar = () => (
           </li>
           <li role="none">
             <a
-              href="#"
+              href="/shops"
               role="menuitem"
               tabIndex={0}
               className="text-gray-700 hover:text-blue-600 transition-colors focus:outline-none focus-visible:ring-2 ring-blue-400"
