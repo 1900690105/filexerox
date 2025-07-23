@@ -62,7 +62,7 @@ export default function RequestDetailsPage() {
       time: "2025-07-22T11:00:00Z",
       files: [
         {
-          filename: "logo.png",
+          filename: "mark.pdf",
           settings: {
             color: "black_and_white",
             sides: "double_sided",
