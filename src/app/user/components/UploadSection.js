@@ -7,6 +7,7 @@ import {
   CheckCircle,
   XCircle,
   X,
+  Settings,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 
@@ -14,6 +15,7 @@ function UploadSection({ isDragOver, setIsDragOver }) {
   const [files, setFiles] = useState([]);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
   const [isUploading, setIsUploading] = useState(false);
+  const [setting, setSetting] = useState(false);
   const [printingOptions, setPrintingOptions] = useState({
     pages: "all",
     pageRange: "",
@@ -56,33 +58,42 @@ function UploadSection({ isDragOver, setIsDragOver }) {
 
     try {
       // Simulate upload process
-      const newUploads = files.map((file) => ({
-        name: file.name,
-        date: new Date().toISOString().split("T")[0],
-        status: "Pending",
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        type: file.name.split(".").pop().toUpperCase(),
-        printingOptions: { ...printingOptions },
-      }));
-
-      // Simulate API call with delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Simulate random success/failure for demo
-      const isSuccess = Math.random() > 0.2; // 80% success rate
-
-      if (isSuccess) {
-        setFiles([]);
-        showToast(
-          `${files.length} file${
-            files.length > 1 ? "s" : ""
-          } uploaded successfully!`,
-          "success"
-        );
-        console.log("Files uploaded successfully:", newUploads);
+      // const newUploads = files.map((file) => ({
+      //   name: file.name,
+      //   date: new Date().toISOString().split("T")[0],
+      //   status: "Pending",
+      //   size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+      //   type: file.name.split(".").pop().toUpperCase(),
+      //   printingOptions: { ...printingOptions },
+      // }));
+      var newUploads;
+      if (setting) {
+        newUploads = files.map((file) => ({
+          name: file.name,
+          date: new Date().toISOString().split("T")[0],
+          status: "Pending",
+          size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+          type: file.name.split(".").pop().toUpperCase(),
+          printingOptions: { ...printingOptions },
+        }));
       } else {
-        throw new Error("Upload failed");
+        newUploads = files.map((file) => ({
+          name: file.name,
+          date: new Date().toISOString().split("T")[0],
+          status: "Pending",
+          size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+          type: file.name.split(".").pop().toUpperCase(),
+        }));
       }
+
+      setFiles([]);
+      showToast(
+        `${files.length} file${
+          files.length > 1 ? "s" : ""
+        } uploaded successfully!`,
+        "success"
+      );
+      console.log("Files uploaded successfully:", newUploads);
     } catch (error) {
       showToast(
         "Upload failed. Please check your connection and try again.",
@@ -210,184 +221,196 @@ function UploadSection({ isDragOver, setIsDragOver }) {
               accept=".pdf,.doc,.docx"
             />
           </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 flex items-center space-x-2">
+              <Building2 className="w-4 h-4" />
+              <span>Xerox Center Code</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Enter center code"
+              value={printingOptions.xeroxCenterCode}
+              onChange={(e) =>
+                handlePrintingOptionChange("xeroxCenterCode", e.target.value)
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div className=" border p-2 w-44">
+            <button
+              onClick={() => {
+                setSetting(!setting);
+              }}
+              className="flex gap-2 cursor-pointer"
+            >
+              <Settings />
+              <span>Print Settings</span>
+            </button>
+          </div>
 
           {/* Printing Options */}
-          <div className="bg-gray-50 rounded-xl p-6">
-            <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center space-x-2">
-              <Printer className="w-5 h-5 text-purple-600" />
-              <span>Choose Printing Options</span>
-            </h3>
+          {setting && (
+            <div className="bg-gray-50 rounded-xl p-6">
+              <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center space-x-2">
+                <Printer className="w-5 h-5 text-purple-600" />
+                <span>Choose Printing Options</span>
+              </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Pages Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Pages
-                </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Pages Selection */}
                 <div className="space-y-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="pages"
-                      value="all"
-                      checked={printingOptions.pages === "all"}
-                      onChange={(e) =>
-                        handlePrintingOptionChange("pages", e.target.value)
-                      }
-                      className="text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">All pages</span>
+                  <label className="text-sm font-medium text-gray-700">
+                    Pages
                   </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="pages"
-                      value="range"
-                      checked={printingOptions.pages === "range"}
-                      onChange={(e) =>
-                        handlePrintingOptionChange("pages", e.target.value)
-                      }
-                      className="text-blue-600"
-                    />
-                    <span className="text-sm text-gray-700">Page range:</span>
-                  </label>
-                  {printingOptions.pages === "range" && (
-                    <input
-                      type="text"
-                      placeholder="e.g., 1-5, 10, 15-20"
-                      value={printingOptions.pageRange}
-                      onChange={(e) =>
-                        handlePrintingOptionChange("pageRange", e.target.value)
-                      }
-                      className="ml-6 px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  )}
+                  <div className="space-y-2">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="pages"
+                        value="all"
+                        checked={printingOptions.pages === "all"}
+                        onChange={(e) =>
+                          handlePrintingOptionChange("pages", e.target.value)
+                        }
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm text-gray-700">All pages</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="pages"
+                        value="range"
+                        checked={printingOptions.pages === "range"}
+                        onChange={(e) =>
+                          handlePrintingOptionChange("pages", e.target.value)
+                        }
+                        className="text-blue-600"
+                      />
+                      <span className="text-sm text-gray-700">Page range:</span>
+                    </label>
+                    {printingOptions.pages === "range" && (
+                      <input
+                        type="text"
+                        placeholder="e.g., 1-5, 10, 15-20"
+                        value={printingOptions.pageRange}
+                        onChange={(e) =>
+                          handlePrintingOptionChange(
+                            "pageRange",
+                            e.target.value
+                          )
+                        }
+                        className="ml-6 px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Color Mode */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Color Mode
-                </label>
-                <select
-                  value={printingOptions.colorMode}
-                  onChange={(e) =>
-                    handlePrintingOptionChange("colorMode", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="bw">Black & White</option>
-                  <option value="color">Color</option>
-                </select>
-              </div>
-
-              {/* Single/Double Sided */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Printing Side
-                </label>
-                <select
-                  value={printingOptions.sided}
-                  onChange={(e) =>
-                    handlePrintingOptionChange("sided", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="single">Single-sided</option>
-                  <option value="double">Double-sided</option>
-                </select>
-              </div>
-
-              {/* Page per Sheet */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Pages per Sheet
-                </label>
-                <select
-                  value={printingOptions.pagePerSheet}
-                  onChange={(e) =>
-                    handlePrintingOptionChange("pagePerSheet", e.target.value)
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="1">1 page per sheet</option>
-                  <option value="2">2 pages per sheet</option>
-                  <option value="4">4 pages per sheet</option>
-                  <option value="6">6 pages per sheet</option>
-                  <option value="9">9 pages per sheet</option>
-                  <option value="16">16 pages per sheet</option>
-                </select>
-              </div>
-
-              {/* Number of Copies */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center space-x-2">
-                  <Copy className="w-4 h-4" />
-                  <span>Number of Copies</span>
-                </label>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handlePrintingOptionChange(
-                        "copies",
-                        Math.max(1, printingOptions.copies - 1)
-                      )
-                    }
-                    className="w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={printingOptions.copies}
+                {/* Color Mode */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Color Mode
+                  </label>
+                  <select
+                    value={printingOptions.colorMode}
                     onChange={(e) =>
-                      handlePrintingOptionChange(
-                        "copies",
-                        parseInt(e.target.value) || 1
-                      )
+                      handlePrintingOptionChange("colorMode", e.target.value)
                     }
-                    className="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handlePrintingOptionChange(
-                        "copies",
-                        Math.min(100, printingOptions.copies + 1)
-                      )
-                    }
-                    className="w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    +
-                  </button>
+                    <option value="bw">Black & White</option>
+                    <option value="color">Color</option>
+                  </select>
                 </div>
-              </div>
 
-              {/* Xerox Center Code */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700 flex items-center space-x-2">
-                  <Building2 className="w-4 h-4" />
-                  <span>Xerox Center Code</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter center code"
-                  value={printingOptions.xeroxCenterCode}
-                  onChange={(e) =>
-                    handlePrintingOptionChange(
-                      "xeroxCenterCode",
-                      e.target.value
-                    )
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
+                {/* Single/Double Sided */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Printing Side
+                  </label>
+                  <select
+                    value={printingOptions.sided}
+                    onChange={(e) =>
+                      handlePrintingOptionChange("sided", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="single">Single-sided</option>
+                    <option value="double">Double-sided</option>
+                  </select>
+                </div>
+
+                {/* Page per Sheet */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Pages per Sheet
+                  </label>
+                  <select
+                    value={printingOptions.pagePerSheet}
+                    onChange={(e) =>
+                      handlePrintingOptionChange("pagePerSheet", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="1">1 page per sheet</option>
+                    <option value="2">2 pages per sheet</option>
+                    <option value="4">4 pages per sheet</option>
+                    <option value="6">6 pages per sheet</option>
+                    <option value="9">9 pages per sheet</option>
+                    <option value="16">16 pages per sheet</option>
+                  </select>
+                </div>
+
+                {/* Number of Copies */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center space-x-2">
+                    <Copy className="w-4 h-4" />
+                    <span>Number of Copies</span>
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handlePrintingOptionChange(
+                          "copies",
+                          Math.max(1, printingOptions.copies - 1)
+                        )
+                      }
+                      className="w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={printingOptions.copies}
+                      onChange={(e) =>
+                        handlePrintingOptionChange(
+                          "copies",
+                          parseInt(e.target.value) || 1
+                        )
+                      }
+                      className="w-16 px-2 py-1 border border-gray-300 rounded-md text-center text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handlePrintingOptionChange(
+                          "copies",
+                          Math.min(100, printingOptions.copies + 1)
+                        )
+                      }
+                      className="w-8 h-8 rounded-md border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+          {/* Xerox Center Code */}
 
           {/* Upload Button */}
           <button
