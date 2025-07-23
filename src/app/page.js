@@ -58,8 +58,6 @@ export default function Home() {
 
       {/* Features Section */}
       <Features />
-      <LocationFetcher />
-
       {/* How It Works - Redesigned */}
       <section
         id="howitworks"
