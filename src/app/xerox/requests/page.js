@@ -91,7 +91,6 @@ const RequestPage = () => {
     },
   ];
 
-  // Filter and sort requests
   const filteredRequests = requests
     .filter((req) => {
       const matchesSearch =
@@ -107,7 +106,6 @@ const RequestPage = () => {
       return a.uniqueId.localeCompare(b.uniqueId);
     });
 
-  // Status configurations
   const statusConfig = {
     pending: {
       icon: Clock,
@@ -131,7 +129,6 @@ const RequestPage = () => {
     },
   };
 
-  // Statistics
   const stats = {
     total: requests.length,
     pending: requests.filter((r) => r.status === "pending").length,
@@ -153,113 +150,124 @@ const RequestPage = () => {
   const StatusBadge = ({ status }) => {
     const config = statusConfig[status];
     const Icon = config.icon;
-
     return (
       <span
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.color}`}
+        role="status"
+        aria-label={config.label}
       >
-        <Icon className="w-3 h-3 mr-1" />
+        <Icon className="w-3 h-3 mr-1" aria-hidden="true" />
         {config.label}
       </span>
     );
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+    <main
+      className="min-h-screen bg-gray-50 p-4 md:p-6"
+      role="main"
+      aria-label="Request Management Page"
+    >
+      <div className="max-w-7xl mx-auto space-y-8">
+        <header>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
             Request Management
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-base">
             Monitor and manage file processing requests
           </p>
-        </div>
+        </header>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.total}
-                </p>
-              </div>
-              <FileText className="w-8 h-8 text-gray-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {stats.pending}
-                </p>
-              </div>
-              <Clock className="w-8 h-8 text-yellow-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">In Progress</p>
-                <p className="text-2xl font-bold text-blue-600">
-                  {stats.in_progress}
-                </p>
-              </div>
-              <Play className="w-8 h-8 text-blue-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-green-600">
-                  {stats.completed}
-                </p>
-              </div>
-              <CheckCircle className="w-8 h-8 text-green-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 shadow-sm border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Cancelled</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {stats.cancelled}
-                </p>
-              </div>
-              <XCircle className="w-8 h-8 text-red-500" />
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Search */}
-        <div className="bg-white rounded-lg shadow-sm border mb-6">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Search by request ID or user ID..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
+        {/* Stats */}
+        <section aria-labelledby="stats-heading">
+          <h2 id="stats-heading" className="sr-only">
+            Summary Statistics
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {[
+              {
+                label: "Total",
+                count: stats.total,
+                icon: FileText,
+                color: "text-gray-500",
+              },
+              {
+                label: "Pending",
+                count: stats.pending,
+                icon: Clock,
+                color: "text-yellow-500",
+              },
+              {
+                label: "In Progress",
+                count: stats.in_progress,
+                icon: Play,
+                color: "text-blue-500",
+              },
+              {
+                label: "Completed",
+                count: stats.completed,
+                icon: CheckCircle,
+                color: "text-green-500",
+              },
+              {
+                label: "Cancelled",
+                count: stats.cancelled,
+                icon: XCircle,
+                color: "text-red-500",
+              },
+            ].map(({ label, count, icon: Icon, color }) => (
+              <div
+                key={label}
+                className="bg-white rounded-lg p-4 shadow-sm border"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">{label}</p>
+                    <p
+                      className={`text-2xl font-bold ${color.replace(
+                        "text-",
+                        ""
+                      )}`}
+                    >
+                      {count}
+                    </p>
+                  </div>
+                  <Icon className={`w-8 h-8 ${color}`} aria-hidden="true" />
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
 
-              {/* Status Filter */}
-              <div className="flex gap-2">
+        {/* Filters */}
+        <section aria-labelledby="filter-heading">
+          <h2 id="filter-heading" className="sr-only">
+            Filter and Search
+          </h2>
+          <div className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <label
+                className="relative w-full md:w-1/2"
+                aria-label="Search Requests"
+              >
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by request ID or user ID..."
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </label>
+              <div className="flex gap-2 w-full md:w-auto">
+                <label className="sr-only" htmlFor="status-select">
+                  Status
+                </label>
                 <select
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  id="status-select"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Status</option>
                   <option value="pending">Pending</option>
@@ -267,12 +275,14 @@ const RequestPage = () => {
                   <option value="completed">Completed</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-
-                {/* Sort */}
+                <label className="sr-only" htmlFor="sort-select">
+                  Sort By
+                </label>
                 <select
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  id="sort-select"
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="time">Sort by Time</option>
                   <option value="files">Sort by Files</option>
@@ -281,123 +291,112 @@ const RequestPage = () => {
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Request ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Files
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Time
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredRequests.map((request) => (
-                  <tr
-                    key={request.uniqueId}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <FileText className="w-4 h-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-900">
-                          {request.uniqueId}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <User className="w-4 h-4 text-gray-400 mr-2" />
-                        <span className="text-sm text-gray-500">
-                          {request.userId}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        {request.numberOfFiles} files
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                        {formatTime(request.time)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={request.status} />
-                    </td>
+        {/* Request List Table */}
+        <section aria-labelledby="table-heading">
+          <h2 id="table-heading" className="sr-only">
+            Request Table
+          </h2>
+          <div
+            className="bg-white rounded-lg shadow-sm border"
+            role="table"
+            aria-label="Request List Table"
+          >
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+                  <tr>
+                    <th className="px-6 py-3">Request ID</th>
+                    <th className="px-6 py-3">User ID</th>
+                    <th className="px-6 py-3">Files</th>
+                    <th className="px-6 py-3">Time</th>
+                    <th className="px-6 py-3">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Card View */}
-          <div className="md:hidden">
-            {filteredRequests.map((request) => (
-              <div
-                key={request.uniqueId}
-                className="border-b border-gray-200 p-4 last:border-b-0"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center">
-                    <FileText className="w-4 h-4 text-gray-400 mr-2" />
-                    <span className="text-sm font-medium text-gray-900">
-                      {request.uniqueId}
-                    </span>
-                  </div>
-                  <StatusBadge status={request.status} />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <User className="w-4 h-4 text-gray-400 mr-2" />
-                    {request.userId}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {request.numberOfFiles} files
-                    </span>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="w-4 h-4 text-gray-400 mr-1" />
-                      {formatTime(request.time)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {filteredRequests.length === 0 && (
-            <div className="text-center py-12">
-              <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No requests found
-              </h3>
-              <p className="text-gray-500">
-                Try adjusting your search or filter criteria
-              </p>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredRequests.map((req) => (
+                    <tr
+                      key={req.uniqueId}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-gray-400" />
+                          {req.uniqueId}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-gray-400" />
+                          {req.userId}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">{req.numberOfFiles} files</td>
+                      <td className="px-6 py-4">
+                        <span className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          {formatTime(req.time)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={req.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
+
+            {/* Mobile Cards */}
+            <div
+              className="md:hidden"
+              role="list"
+              aria-label="Mobile Request Cards"
+            >
+              {filteredRequests.map((req) => (
+                <div
+                  key={req.uniqueId}
+                  className="p-4 border-b border-gray-200"
+                  role="listitem"
+                >
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-semibold">
+                      {req.uniqueId}
+                    </span>
+                    <StatusBadge status={req.status} />
+                  </div>
+                  <div className="text-sm text-gray-600 mb-1">
+                    <User className="inline w-4 h-4 mr-1 text-gray-400" />
+                    {req.userId}
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{req.numberOfFiles} files</span>
+                    <span className="flex items-center">
+                      <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                      {formatTime(req.time)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Empty State */}
+            {filteredRequests.length === 0 && (
+              <div className="text-center py-12">
+                <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No requests found
+                </h3>
+                <p className="text-gray-500">
+                  Try adjusting your search or filters.
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 
