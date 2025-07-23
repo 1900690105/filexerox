@@ -13,10 +13,8 @@ import {
 } from "lucide-react";
 import { Navbar } from "../../components/NavBar";
 import Image from "next/image";
-import UploadSection from "@/app/user/components/UploadSection";
 
 export default function Dashboard() {
-  const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFileForPreview, setSelectedFileForPreview] = useState(null);
   const previewModalRef = useRef(null);
 
@@ -166,9 +164,6 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-
-        {/* Upload Section */}
-        <UploadSection isDragOver={isDragOver} setIsDragOver={setIsDragOver} />
 
         {/* Files List */}
         <section aria-labelledby="file-section-title">
