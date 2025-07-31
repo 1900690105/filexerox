@@ -9,7 +9,7 @@ function HeroSection({ dragActive, setDragActive }) {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      window.location.href = "/user/upload";
+      window.location.href = "/upload";
     }
   };
 
@@ -94,7 +94,7 @@ function HeroSection({ dragActive, setDragActive }) {
             className={`relative group cursor-pointer transition-all duration-300 ${
               dragActive ? "scale-105" : "hover:scale-102"
             }`}
-            onClick={() => (window.location.href = "/user/upload")}
+            onClick={() => (window.location.href = "/upload")}
             onKeyDown={handleKeyPress}
             // Optional Drag Events
             // onDragEnter={handleDrag}

@@ -10,6 +10,8 @@ import {
 import HeroSection from "./components/HeroSection";
 import Features from "./components/Features";
 import LocationFetcher from "./components/GetLocation";
+import QRCodeGenerator from "./components/QRCode";
+import CanvasQR from "./components/QRCode";
 
 // Mock Navbar component
 
@@ -55,6 +57,8 @@ export default function Home() {
 
       {/* Hero Section */}
       <HeroSection dragActive={dragActive} setDragActive={setDragActive} />
+
+      <CanvasQR />
 
       {/* Features Section */}
       <Features />
