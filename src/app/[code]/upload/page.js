@@ -154,7 +154,7 @@ const UploadPage = () => {
         xeroxCenterCode: xeroxCode,
         files: uploadedFiles,
         totalFiles: uploadedFiles.length,
-        orderid: orderId,
+        orderid: id,
         createdAt: serverTimestamp(),
       });
 
