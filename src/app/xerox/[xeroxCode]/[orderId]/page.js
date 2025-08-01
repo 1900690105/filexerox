@@ -45,107 +45,114 @@ const XeroxViewPage = () => {
   const downloadAndPrint = async (file) => {
     setIsLoading(true);
     try {
-      // Create a new window for printing
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Print - ${file.fileName}</title>
-            <style>
-              @media print {
-                @page {
-                  margin: 0.5in;
-                  size: auto;
-                }
-                body {
-                  margin: 0;
-                  padding: 0;
-                  font-family: Arial, sans-serif;
-                }
-                img {
-                  max-width: 100%;
-                  height: auto;
-                  page-break-inside: avoid;
-                }
-                iframe {
-                  width: 100%;
-                  height: 100vh;
-                  border: none;
-                }
-                .no-print {
-                  display: none !important;
-                }
-              }
-              body {
-                margin: 20px;
-                font-family: Arial, sans-serif;
-              }
-              .print-button {
-                background: #007bff;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                margin-bottom: 20px;
-              }
-              .print-button:hover {
-                background: #0056b3;
-              }
-              img {
-                max-width: 100%;
-                height: auto;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                padding: 5px;
-              }
-              iframe {
-                width: 100%;
-                height: 80vh;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-              }
-            </style>
-          </head>
-          <body>
-            <button class="print-button no-print" onclick="window.print()">Print Document</button>
-            <h2 class="no-print">File: ${file.fileName}</h2>
-      `);
-
       if (file.fileType.startsWith("image")) {
-        printWindow.document.write(`
-          <img src="${file.imageUrl}" alt="${file.fileName}" />
-        `);
-      } else if (file.fileType === "application/pdf") {
-        printWindow.document.write(`
-          <iframe src="${file.imageUrl}#toolbar=0&navpanes=0&scrollbar=0" title="${file.fileName}"></iframe>
-        `);
-      } else {
-        // For other document types (Word, PPT, etc.)
-        printWindow.document.write(`
-          <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-            file.imageUrl
-          )}" title="${file.fileName}"></iframe>
-        `);
-      }
-
-      printWindow.document.write(`
-          </body>
-        </html>
-      `);
-
-      printWindow.document.close();
-
-      // Wait for content to load before enabling print
-      printWindow.onload = () => {
-        setTimeout(() => {
+        // For images, use a direct approach
+        const img = new Image();
+        img.onload = () => {
+          const printWindow = window.open("", "_blank");
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${file.fileName}</title>
+                <style>
+                  @page {
+                    margin: 0;
+                    size: auto;
+                  }
+                  * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                  }
+                  html, body {
+                    height: 100%;
+                    overflow: hidden;
+                  }
+                  img {
+                    width: 100%;
+                    height: 100vh;
+                    object-fit: contain;
+                    display: block;
+                  }
+                  @media print {
+                    img {
+                      width: 100% !important;
+                      height: 100vh !important;
+                      object-fit: contain !important;
+                      page-break-inside: avoid;
+                    }
+                  }
+                </style>
+              </head>
+              <body>
+                <img src="${file.imageUrl}" alt="${file.fileName}" onload="setTimeout(() => window.print(), 500)" />
+              </body>
+            </html>
+          `);
+          printWindow.document.close();
           setIsLoading(false);
-        }, 1000);
-      };
+        };
+        img.onerror = () => {
+          setIsLoading(false);
+          alert("Error loading image for printing.");
+        };
+        img.src = file.imageUrl;
+      } else {
+        // For PDFs and documents, provide download option
+        alert(
+          "For best printing results with documents and PDFs, please use the download option and print directly from your system's PDF viewer or document application."
+        );
+        directDownload(file);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error("Error preparing document for print:", error);
       setIsLoading(false);
       alert("Error preparing document for printing. Please try again.");
+    }
+  };
+
+  const printImageDirect = async (file) => {
+    if (!file.fileType.startsWith("image")) return;
+
+    setIsLoading(true);
+    try {
+      // Create a clean print layout for images
+      const printContent = `
+        data:text/html,
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${encodeURIComponent(file.fileName)}</title>
+            <style>
+              @page { margin: 0; size: auto; }
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              html, body { height: 100%; }
+              img { 
+                width: 100vw; 
+                height: 100vh; 
+                object-fit: contain; 
+                display: block; 
+              }
+            </style>
+          </head>
+          <body>
+            <img src="${encodeURIComponent(
+              file.imageUrl
+            )}" onload="setTimeout(() => { window.print(); window.close(); }, 1000)" />
+          </body>
+        </html>
+      `;
+
+      const printWindow = window.open(printContent, "_blank");
+      setTimeout(() => setIsLoading(false), 1500);
+    } catch (error) {
+      console.error("Error printing image:", error);
+      setIsLoading(false);
+      alert(
+        "Error printing image. Please try downloading and printing manually."
+      );
     }
   };
 
@@ -204,19 +211,47 @@ const XeroxViewPage = () => {
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => previewDocument(file)}
-            className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition-colors"
-          >
-            Preview
-          </button>
-          <button
-            onClick={() => downloadAndPrint(file)}
-            disabled={isLoading}
-            className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-          >
-            {isLoading ? "Preparing..." : "Print"}
-          </button>
+          {/* Show preview for PDF and images */}
+          {(file.fileType.startsWith("image") ||
+            file.fileType === "application/pdf") && (
+            <button
+              onClick={() => previewDocument(file)}
+              className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition-colors"
+            >
+              Preview
+            </button>
+          )}
+
+          {/* For other document types, show preview and download */}
+          {!file.fileType.startsWith("image") &&
+            file.fileType !== "application/pdf" && (
+              <>
+                <button
+                  onClick={() => previewDocument(file)}
+                  className="bg-green-600 text-white px-3 py-2 rounded text-sm hover:bg-green-700 transition-colors"
+                >
+                  Preview
+                </button>
+                <button
+                  onClick={() => directDownload(file)}
+                  className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors"
+                  title="Download to print from your system"
+                >
+                  Download
+                </button>
+              </>
+            )}
+
+          {/* Print button only for images */}
+          {file.fileType.startsWith("image") && (
+            <button
+              onClick={() => printImageDirect(file)}
+              disabled={isLoading}
+              className="bg-blue-600 text-white px-3 py-2 rounded text-sm hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+            >
+              {isLoading ? "Preparing..." : "Print"}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -259,13 +294,23 @@ const XeroxViewPage = () => {
                 {previewFile.fileName}
               </h2>
               <div className="flex gap-2">
-                <button
-                  onClick={() => downloadAndPrint(previewFile)}
-                  disabled={isLoading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors disabled:bg-gray-400"
-                >
-                  {isLoading ? "Preparing..." : "Print"}
-                </button>
+                {previewFile.fileType.startsWith("image") ? (
+                  <button
+                    onClick={() => printImageDirect(previewFile)}
+                    disabled={isLoading}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                  >
+                    {isLoading ? "Preparing..." : "Print"}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => directDownload(previewFile)}
+                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                    title="Download to print from your system"
+                  >
+                    Download
+                  </button>
+                )}
                 <button
                   onClick={closePreview}
                   className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
@@ -279,8 +324,8 @@ const XeroxViewPage = () => {
               {previewFile.fileType.startsWith("image") ? (
                 <Image
                   src={previewFile.imageUrl}
-                  height={100}
-                  width={100}
+                  height={200}
+                  width={200}
                   alt={previewFile.fileName}
                   className="max-w-full h-auto mx-auto"
                 />
@@ -327,128 +372,3 @@ const XeroxViewPage = () => {
 };
 
 export default XeroxViewPage;
-
-// "use client";
-// import { useEffect, useState } from "react";
-// import { collection, query, where, getDocs } from "firebase/firestore";
-// import Image from "next/image";
-
-// import { useParams } from "next/navigation";
-// import { db } from "../../../../../utils/firebaseConfig";
-
-// const XeroxViewPage = () => {
-//   const params = useParams();
-//   const orderId = params.orderId;
-//   const xeroxCode = params.xeroxCode;
-//   const [fileData, setFileData] = useState([]);
-
-//   useEffect(() => {
-//     const fetchFiles = async () => {
-//       if (!xeroxCode) return;
-//       try {
-//         const q = query(
-//           collection(db, "xeroxUploads"),
-//           where("xeroxCenterCode", "==", xeroxCode),
-//           where("orderid", "==", Number(orderId))
-//         );
-//         const snapshot = await getDocs(q);
-//         const files = [];
-
-//         snapshot.forEach((doc) => {
-//           const docData = doc.data();
-//           if (docData.files && Array.isArray(docData.files)) {
-//             files.push(...docData.files);
-//           }
-//         });
-
-//         setFileData(files);
-//         console.log(files);
-//       } catch (err) {
-//         console.error("Error fetching files:", err);
-//       }
-//     };
-
-//     fetchFiles();
-//   }, [xeroxCode, orderId]);
-
-//   const renderFile = (file) => {
-//     const { fileType, fileName, imageUrl } = file;
-
-//     if (fileType.startsWith("image")) {
-//       return (
-//         <div key={fileName} className="border p-4 rounded shadow-md">
-//           <p className="font-medium">{fileName}</p>
-//           <Image
-//             src={imageUrl}
-//             width={200}
-//             height={200}
-//             alt={fileName}
-//             className="max-w-xs mt-2"
-//           />
-//           <button
-//             onClick={() => window.print()}
-//             className="mt-2 bg-blue-600 text-white px-4 py-1 rounded"
-//           >
-//             Print
-//           </button>
-//         </div>
-//       );
-//     } else if (fileType === "application/pdf") {
-//       return (
-//         <div key={fileName} className="border p-4 rounded shadow-md">
-//           <p className="font-medium">{fileName}</p>
-//           <iframe
-//             src={`${imageUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-//             width="100%"
-//             height="500px"
-//             title={fileName}
-//           ></iframe>
-//           <button
-//             onClick={() => window.print()}
-//             className="mt-2 bg-blue-600 text-white px-4 py-1 rounded"
-//           >
-//             Print
-//           </button>
-//         </div>
-//       );
-//     } else {
-//       return (
-//         <div key={fileName} className="border p-4 rounded shadow-md">
-//           <p className="font-medium">{fileName}</p>
-//           <iframe
-//             src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-//               imageUrl
-//             )}`}
-//             width="100%"
-//             height="500px"
-//             frameBorder="0"
-//             title={fileName}
-//           ></iframe>
-//           <button
-//             onClick={() => window.print()}
-//             className="mt-2 bg-blue-600 text-white px-4 py-1 rounded"
-//           >
-//             Print
-//           </button>
-//         </div>
-//       );
-//     }
-//   };
-
-//   return (
-//     <div className="max-w-5xl mx-auto px-4 py-8 mt-20">
-//       <h1 className="text-3xl font-bold mb-6 text-center">
-//         Files for Xerox Center: {xeroxCode}
-//       </h1>
-//       <div className="grid gap-6">
-//         {fileData.length > 0 ? (
-//           fileData.map((file) => renderFile(file))
-//         ) : (
-//           <p className="text-center">No files available.</p>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default XeroxViewPage;

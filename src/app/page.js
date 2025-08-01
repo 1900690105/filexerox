@@ -9,9 +9,7 @@ import {
 } from "lucide-react";
 import HeroSection from "./components/HeroSection";
 import Features from "./components/Features";
-import LocationFetcher from "./components/GetLocation";
-import QRCodeGenerator from "./components/QRCode";
-import CanvasQR from "./components/QRCode";
+import Link from "next/link";
 
 // Mock Navbar component
 
@@ -57,8 +55,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <HeroSection dragActive={dragActive} setDragActive={setDragActive} />
-
-      <CanvasQR />
 
       {/* Features Section */}
       <Features />
@@ -225,7 +221,22 @@ export default function Home() {
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
             <p>
-              &copy; {new Date().getFullYear()} FileXerox. All rights reserved.
+              &copy; {new Date().getFullYear()} FileXerox . All rights reserved
+              by{" "}
+              <Link
+                className="underline"
+                href={"/https://electrosoftsystem.in/"}
+              >
+                Electrosoft Systems
+              </Link>
+              .Developed by{" "}
+              <Link
+                className="underline"
+                href={"https://nikhilkandhare.vercel.app/"}
+              >
+                {" "}
+                Nikhil Kandhare{" "}
+              </Link>{" "}
             </p>
           </div>
         </div>

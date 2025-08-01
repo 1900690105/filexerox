@@ -1,9 +1,17 @@
 "use client";
 import { useEffect, useState } from "react";
-import { FileText, Calendar, Hash, Clock, ChevronRight } from "lucide-react";
+import {
+  FileText,
+  Calendar,
+  Hash,
+  Clock,
+  ChevronRight,
+  QrCode,
+} from "lucide-react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { useParams } from "next/navigation";
 import { db } from "../../../../utils/firebaseConfig";
+import HeaderSection from "./components/HeaderSection";
 
 function XeroxOrderList() {
   const [orders, setOrders] = useState([]);
@@ -109,18 +117,7 @@ function XeroxOrderList() {
     <div className="min-h-screen mt-20 bg-gradient-to-br from-slate-50 to-blue-50 p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <FileText className="w-6 h-6 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-slate-800">Xerox Orders</h1>
-          </div>
-          <p className="text-slate-600">
-            Manage and track your printing orders
-          </p>
-        </div>
-
+        <HeaderSection />
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">

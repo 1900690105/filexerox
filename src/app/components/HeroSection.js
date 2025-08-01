@@ -94,7 +94,7 @@ function HeroSection({ dragActive, setDragActive }) {
             className={`relative group cursor-pointer transition-all duration-300 ${
               dragActive ? "scale-105" : "hover:scale-102"
             }`}
-            onClick={() => (window.location.href = "/upload")}
+            onClick={() => (window.location.href = "/code/upload")}
             onKeyDown={handleKeyPress}
             // Optional Drag Events
             // onDragEnter={handleDrag}
@@ -158,7 +158,7 @@ function HeroSection({ dragActive, setDragActive }) {
         <div className="flex flex-wrap justify-center gap-4">
           <button
             onClick={() => {
-              window.location.href = "/user/upload";
+              window.location.href = "/code/upload";
             }}
             className="group bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus-visible:ring-2 ring-blue-400"
           >
@@ -166,7 +166,7 @@ function HeroSection({ dragActive, setDragActive }) {
             <ArrowRight className="inline-block w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </button>
           <button className="bg-white/80 backdrop-blur-sm text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border border-gray-200 hover:bg-white hover:shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus-visible:ring-2 ring-blue-400">
-            Find Locations
+            Shops Near You
           </button>
         </div>
       </div>
