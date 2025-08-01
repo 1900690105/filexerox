@@ -13,7 +13,7 @@ function HeaderSection() {
 
     QRCode.toCanvas(
       canvasRef.current,
-      `filexerox/${xeroxCode}/upload`,
+      `https://filexerox.vercel.app/${xeroxCode}/upload`,
       function (error) {
         if (error) console.error(error);
       }
