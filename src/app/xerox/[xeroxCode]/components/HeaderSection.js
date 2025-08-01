@@ -4,7 +4,6 @@ import React, { useRef, useState } from "react";
 import QRCode from "qrcode";
 
 function HeaderSection() {
-  const [myQr, setMyQr] = useState(true);
   const params = useParams();
   const { xeroxCode } = params;
   const canvasRef = useRef();
